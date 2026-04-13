@@ -1,8 +1,6 @@
 import os
 import asyncio
 import sys
-import tkinter as tk
-from tkinter import filedialog
 from fastapi import FastAPI, Request, BackgroundTasks
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -73,14 +71,24 @@ async def index(request: Request):
 
 @app.get("/pick-file")
 async def pick_file():
-    root = tk.Tk()
-    root.withdraw()
-    os.system('''/usr/bin/osascript -e 'tell app "System Events" to set frontmost of every process whose name is "Python" to true' ''')
-    file_path = filedialog.askopenfilename(title="Elegir Archivo")
-    root.destroy()
-    if file_path:
-        app.state.current_file = file_path
-        return {"status": "success", "file_path": file_path}
+    """Lanza el diálogo de archivos usando AppleScript nativo (más estable que Tkinter)."""
+    try:
+        # Script para pedir un archivo y devolver su ruta POSIX
+        script = 'set theFile to (choose file with prompt "Selecciona un video o audio")\nreturn POSIX path of theFile'
+        process = await asyncio.create_subprocess_exec(
+            'osascript', '-e', script,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, _ = await process.communicate()
+        file_path = stdout.decode().strip()
+        
+        if file_path:
+            app.state.current_file = file_path
+            return {"status": "success", "file_path": file_path}
+    except Exception as e:
+        print(f"Error en seleccionador: {e}")
+        
     return {"status": "cancelled"}
 
 @app.post("/start")
