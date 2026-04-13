@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcripción M4 | Ultra-Rápida</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.5);
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: #94a3b8;
+            margin-bottom: 40px;
+        }
+
+        .file-selector {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px dashed var(--glass-border);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .file-selector:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 15px -3px var(--primary-glow);
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .btn:disabled {
+            background: #475569;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px var(--primary-glow);
+        }
+
+        .status-area {
+            margin-top: 30px;
+            text-align: left;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .progress-bar-container {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #6366f1, #a855f7);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .log {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 12px;
+            height: 120px;
+            overflow-y: auto;
+            color: #cbd5e1;
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+
+        .success-icon {
+            color: #22c55e;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        #selected-file-name {
+            font-weight: 600;
+            color: #818cf8;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="glass-card">
+            <h1>Transcripción M4</h1>
+            <p class="subtitle">Optimizado para Apple Silicon M1-M4</p>
+
+            <div class="file-selector" id="drop-zone" onclick="pickFile()">
+                <div id="selection-text">Haz clic aquí para seleccionar un video</div>
+                <div id="selected-file-name" style="margin-top: 10px;"></div>
+            </div>
+
+            <div style="margin-bottom: 20px; text-align: left;">
+                <label style="font-size: 0.8rem; color: #94a3b8; display: block; margin-bottom: 5px;">Modelo de Precisión:</label>
+                <select id="model-select" style="width: 100%; background: rgba(0,0,0,0.3); color: white; border: 1px solid var(--glass-border); padding: 10px; border-radius: 8px; font-family: inherit;">
+                    <option value="mlx-community/whisper-tiny-mlx">Tiny (Más rápido - 75MB)</option>
+                    <option value="mlx-community/whisper-base-mlx">Base (Rápido - 140MB)</option>
+                    <option value="mlx-community/whisper-small-mlx">Small (Equilibrado - 460MB)</option>
+                    <option value="mlx-community/whisper-medium-mlx">Medium (Preciso - 1.5GB)</option>
+                    <option value="mlx-community/whisper-large-v3-turbo-q4">Turbo Q4 (Alta Precisión - Optimizado)</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button id="start-btn" class="btn" disabled onclick="startTranscription()">
+                    Iniciar
+                </button>
+                <button id="clear-btn" class="btn" style="background: rgba(255,255,255,0.1); box-shadow: none;" onclick="clearAll()">
+                    Limpiar
+                </button>
+            </div>
+
+            <div id="download-area" style="margin-top: 20px; display: none;">
+                <a id="download-link" href="/download" class="btn" style="background: #22c55e; text-decoration: none; display: inline-block;">
+                    📥 Descargar (.md)
+                </a>
+            </div>
+
+            <div class="status-area" id="status-area">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="log" id="log-content">Esperando...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = "";
+
+        async function pickFile() {
+            const res = await fetch('/pick-file');
+            const data = await res.json();
+            if (data.status === 'success') {
+                selectedFile = data.file_path;
+                document.getElementById('selected-file-name').innerText = selectedFile.split('/').pop();
+                document.getElementById('selection-text').innerText = "Archivo:";
+                document.getElementById('start-btn').disabled = false;
+            }
+        }
+
+        async function startTranscription() {
+            const model = document.getElementById('model-select').value;
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('download-area').style.display = 'none';
+            document.getElementById('status-area').style.display = 'block';
+            
+            const res = await fetch('/start', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ model: model })
+            });
+            if (res.ok) pollStatus();
+        }
+
+        async function clearAll() {
+            await fetch('/clear', { method: 'POST' });
+            selectedFile = "";
+            document.getElementById('selected-file-name').innerText = "";
+            document.getElementById('selection-text').innerText = "Haz clic aquí para seleccionar un video";
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('status-area').style.display = 'none';
+            document.getElementById('download-area').style.display = 'none';
+            document.getElementById('progress-bar').style.width = '0%';
+            document.getElementById('progress-bar').style.background = '';
+        }
+
+        async function pollStatus() {
+            const res = await fetch('/status');
+            const data = await res.json();
+            
+            const logElement = document.getElementById('log-content');
+            logElement.innerHTML = data.log.join('<br>');
+            logElement.scrollTop = logElement.scrollHeight;
+
+            const progressBar = document.getElementById('progress-bar');
+
+            if (data.status === 'processing') {
+                progressBar.style.width = '50%';
+                setTimeout(pollStatus, 1500);
+            } else if (data.status === 'completed') {
+                progressBar.style.width = '100%';
+                progressBar.style.background = '#22c55e';
+                document.getElementById('download-area').style.display = 'block';
+                document.getElementById('start-btn').disabled = false;
+            } else if (data.status === 'error') {
+                progressBar.style.background = '#ef4444';
+                document.getElementById('start-btn').disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
